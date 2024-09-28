@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>temp_humi chart</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script>
+        var url = 'show_data.php';
+        //get data from db
+        $(function(){
+            $.ajax({
+                url: url, //the script to call to get data
+                data: "",  //you can insert url argumnets here to pass to api.php for example "id=5&parent=6"
+                dataType: 'json', //data format 
+                success: function(data){
+                    console.log(data);
+                    let id = data[0]['id'];
+                    let temp = data[0]['temperature'];
+                    let humi = data[0]['humidity'];
+                    let time = data[0]['create_time'];
+
+                    //Update html content
+                    $('#output').html("<b>id: </b>"+id+"<b> temp: </b>"+temp+"<b> humi: </b>"+humi + '%');
+                    plot(data);
+                }
+            });
+        });
+
+        //create chart
+        function plot(data){
+            let temps = [];
+            let humis = [];
+            let time = [];
+            data.forEach(function(element){ 
+                temps.push(element['temperature']);
+                humis.push(element['humidity']);  
+                time.push(element['create_time']);               
+            });
+            console.log(temps, humis)
+            var ctx = document.getElementById('myTemp').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: time,
+                    datasets: [{
+                        label: 'Temeperatue',
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: temps
+                }]},
+                options: {
+                    tooltips: {
+                        mode: 'point'
+                    }
+                }
+            });
+            //humi
+            var ctx = document.getElementById('myHumi').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: time,
+                    datasets: [{
+                        label: 'Humidity',
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: humis
+                }]},
+                options: {
+                    tooltips: {
+                        mode: 'point'
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <div id="output"></div>
+    <canvas id="myTemp"></canvas>
+    <canvas id="myHumi"></canvas>
+</body>
+</html>
